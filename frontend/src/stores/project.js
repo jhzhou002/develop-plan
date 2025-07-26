@@ -23,9 +23,11 @@ export const useProjectStore = defineStore('project', () => {
       })
       
       const response = await api.get('/projects', { params })
-      projects.value = response.data.data
+      projects.value = response.data.data || []
     } catch (error) {
       console.error('获取项目列表失败:', error)
+      console.error('错误详情:', error.response?.data || error.message)
+      projects.value = []
     } finally {
       loading.value = false
     }

@@ -42,11 +42,23 @@ class ProjectController {
       
       const [rows] = await connection.execute(query, params);
       
-      const projects = rows.map(row => ({
-        ...row,
-        tech_stack: row.tech_stack ? JSON.parse(row.tech_stack) : [],
-        tags: row.tags ? row.tags.split(',') : []
-      }));
+      const projects = rows.map(row => {
+        let techStack = [];
+        if (row.tech_stack) {
+          try {
+            techStack = JSON.parse(row.tech_stack);
+          } catch (error) {
+            console.warn('Failed to parse tech_stack for project', row.id, ':', error);
+            techStack = [];
+          }
+        }
+        
+        return {
+          ...row,
+          tech_stack: techStack,
+          tags: row.tags ? row.tags.split(',') : []
+        };
+      });
       
       res.json({
         success: true,
@@ -84,9 +96,19 @@ class ProjectController {
         });
       }
       
+      let techStack = [];
+      if (rows[0].tech_stack) {
+        try {
+          techStack = JSON.parse(rows[0].tech_stack);
+        } catch (error) {
+          console.warn('Failed to parse tech_stack for project', rows[0].id, ':', error);
+          techStack = [];
+        }
+      }
+      
       const project = {
         ...rows[0],
-        tech_stack: rows[0].tech_stack ? JSON.parse(rows[0].tech_stack) : [],
+        tech_stack: techStack,
         tags: rows[0].tags ? rows[0].tags.split(',') : []
       };
       

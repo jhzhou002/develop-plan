@@ -15,7 +15,7 @@ CREATE TABLE `projects` (
   `status` enum('idea','planning','development','testing','completed','paused') NOT NULL DEFAULT 'idea' COMMENT '项目状态',
   `priority` enum('low','medium','high','urgent') NOT NULL DEFAULT 'medium' COMMENT '优先级',
   `category` varchar(100) COMMENT '项目分类',
-  `tech_stack` json COMMENT '技术栈',
+  `tech_stack` text COMMENT '技术栈',
   `start_date` date COMMENT '开始日期',
   `target_date` date COMMENT '目标完成日期',
   `actual_date` date COMMENT '实际完成日期',
