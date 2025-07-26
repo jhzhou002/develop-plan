@@ -140,6 +140,7 @@
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project'
 import { ElMessageBox, ElMessage } from 'element-plus'
@@ -148,7 +149,7 @@ import { Plus, DocumentAdd, MoreFilled, Edit, Delete, List, RefreshLeft } from '
 const router = useRouter()
 const projectStore = useProjectStore()
 
-const { projects, loading } = projectStore
+const { projects, loading } = storeToRefs(projectStore)
 const filters = reactive({
   status: '',
   priority: '',
@@ -241,7 +242,8 @@ onMounted(async () => {
   console.log('Projects页面已挂载，开始获取项目数据...')
   try {
     await projectStore.fetchProjects()
-    console.log('项目数据获取成功，共', projects.value.length, '个项目')
+    const projectCount = projects.value?.length || 0
+    console.log('项目数据获取成功，共', projectCount, '个项目')
   } catch (error) {
     console.error('初始加载项目失败:', error)
   }
