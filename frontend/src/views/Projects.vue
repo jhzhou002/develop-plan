@@ -1,20 +1,23 @@
 <template>
   <div class="projects-page">
     <div class="page-header">
-      <div class="header-left">
-        <h1 class="page-title">我的项目</h1>
-        <p class="page-subtitle">管理你的开发计划和想法</p>
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="page-title">项目概览</h1>
+          <p class="page-description">管理和跟踪你的开发项目进度</p>
+        </div>
+        <el-button type="primary" size="large" @click="$router.push('/create')" class="create-btn">
+          <el-icon><Plus /></el-icon>
+          新建项目
+        </el-button>
       </div>
-      <el-button type="primary" size="large" @click="$router.push('/create')">
-        <el-icon><Plus /></el-icon>
-        新建项目
-      </el-button>
     </div>
 
-    <div class="filters">
-      <el-row :gutter="16">
-        <el-col :span="6">
-          <el-select v-model="filters.status" placeholder="选择状态" clearable @change="handleFilterChange">
+    <div class="filters-section">
+      <div class="filters-container">
+        <div class="filter-group">
+          <label class="filter-label">状态筛选</label>
+          <el-select v-model="filters.status" placeholder="所有状态" clearable @change="handleFilterChange" class="filter-select">
             <el-option label="想法" value="idea" />
             <el-option label="规划中" value="planning" />
             <el-option label="开发中" value="development" />
@@ -22,74 +25,106 @@
             <el-option label="已完成" value="completed" />
             <el-option label="暂停" value="paused" />
           </el-select>
-        </el-col>
-        <el-col :span="6">
-          <el-select v-model="filters.priority" placeholder="选择优先级" clearable @change="handleFilterChange">
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">优先级</label>
+          <el-select v-model="filters.priority" placeholder="所有优先级" clearable @change="handleFilterChange" class="filter-select">
             <el-option label="低" value="low" />
             <el-option label="中" value="medium" />
             <el-option label="高" value="high" />
             <el-option label="紧急" value="urgent" />
           </el-select>
-        </el-col>
-        <el-col :span="6">
-          <el-input v-model="filters.category" placeholder="项目分类" clearable @input="handleFilterChange" />
-        </el-col>
-      </el-row>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">分类</label>
+          <el-input v-model="filters.category" placeholder="搜索分类" clearable @input="handleFilterChange" class="filter-input" />
+        </div>
+      </div>
     </div>
 
-    <div v-loading="loading" class="projects-grid">
-      <div v-if="projects.length === 0 && !loading" class="empty-state">
-        <el-icon size="64" color="#c0c4cc"><DocumentAdd /></el-icon>
-        <p>还没有项目，开始创建你的第一个项目吧！</p>
-        <el-button type="primary" @click="$router.push('/create')">创建项目</el-button>
-      </div>
-      
-      <div v-for="project in projects" :key="project.id" class="project-card" @click="goToProject(project.id)">
-        <div class="card-header">
-          <div class="project-title">{{ project.title }}</div>
-          <el-dropdown @command="handleCommand" @click.stop>
-            <el-icon class="more-icon"><MoreFilled /></el-icon>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item :command="`edit-${project.id}`">编辑</el-dropdown-item>
-                <el-dropdown-item :command="`delete-${project.id}`" divided>删除</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+    <div class="projects-container">
+      <div v-loading="loading" class="projects-content">
+        <div v-if="projects.length === 0 && !loading" class="empty-state">
+          <el-icon size="80" color="#d1d5db"><DocumentAdd /></el-icon>
+          <h3>还没有项目</h3>
+          <p>开始创建你的第一个开发项目吧！</p>
+          <el-button type="primary" size="large" @click="$router.push('/create')">
+            <el-icon><Plus /></el-icon>
+            创建项目
+          </el-button>
         </div>
         
-        <div class="project-description">
-          {{ project.description || '暂无描述' }}
-        </div>
-        
-        <div class="project-meta">
-          <div class="meta-row">
-            <el-tag :type="getStatusType(project.status)" size="small">
-              {{ getStatusText(project.status) }}
-            </el-tag>
-            <el-tag :type="getPriorityType(project.priority)" size="small">
-              {{ getPriorityText(project.priority) }}
-            </el-tag>
+        <div v-else class="projects-grid">
+          <div v-for="project in projects" :key="project.id" class="project-card" @click="goToProject(project.id)">
+            <div class="card-header">
+              <div class="title-section">
+                <h3 class="project-title">{{ project.title }}</h3>
+                <p class="project-category">{{ project.category || '未分类' }}</p>
+              </div>
+              <el-dropdown @command="handleCommand" @click.stop>
+                <el-button text class="more-btn">
+                  <el-icon><MoreFilled /></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item :command="`edit-${project.id}`">
+                      <el-icon><Edit /></el-icon>
+                      编辑
+                    </el-dropdown-item>
+                    <el-dropdown-item :command="`delete-${project.id}`" divided class="danger-item">
+                      <el-icon><Delete /></el-icon>
+                      删除
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+            
+            <div class="project-description">
+              {{ project.description || '暂无项目描述' }}
+            </div>
+            
+            <div class="project-tags">
+              <el-tag :type="getStatusType(project.status)" size="small" class="status-tag">
+                {{ getStatusText(project.status) }}
+              </el-tag>
+              <el-tag :type="getPriorityType(project.priority)" size="small" class="priority-tag">
+                {{ getPriorityText(project.priority) }}
+              </el-tag>
+            </div>
+            
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">完成进度</span>
+                <span class="progress-value">{{ project.progress }}%</span>
+              </div>
+              <el-progress :percentage="project.progress" :show-text="false" :stroke-width="6" />
+            </div>
+            
+            <div class="card-footer">
+              <div class="task-info">
+                <el-icon class="task-icon"><Assignment /></el-icon>
+                <span>{{ project.completed_tasks || 0 }}/{{ project.task_count || 0 }} 任务</span>
+              </div>
+              
+              <div v-if="project.tech_stack && project.tech_stack.length" class="tech-stack">
+                <el-tag 
+                  v-for="tech in project.tech_stack.slice(0, 2)" 
+                  :key="tech" 
+                  size="small" 
+                  effect="plain"
+                  class="tech-tag"
+                >
+                  {{ tech }}
+                </el-tag>
+                <span v-if="project.tech_stack.length > 2" class="more-tech">
+                  +{{ project.tech_stack.length - 2 }}
+                </span>
+              </div>
+            </div>
           </div>
-          
-          <div class="meta-row">
-            <span class="category">{{ project.category || '未分类' }}</span>
-            <span class="task-count">{{ project.completed_tasks || 0 }}/{{ project.task_count || 0 }} 任务</span>
-          </div>
-        </div>
-        
-        <div class="progress-section">
-          <div class="progress-info">
-            <span>进度</span>
-            <span>{{ project.progress }}%</span>
-          </div>
-          <el-progress :percentage="project.progress" :show-text="false" />
-        </div>
-        
-        <div v-if="project.tech_stack && project.tech_stack.length" class="tech-stack">
-          <el-tag v-for="tech in project.tech_stack" :key="tech" size="small" effect="plain">
-            {{ tech }}
-          </el-tag>
         </div>
       </div>
     </div>
@@ -101,7 +136,7 @@ import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { Plus, DocumentAdd, MoreFilled } from '@element-plus/icons-vue'
+import { Plus, DocumentAdd, MoreFilled, Edit, Delete, Assignment } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const projectStore = useProjectStore()
@@ -196,153 +231,276 @@ onMounted(() => {
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
   margin-bottom: 32px;
 }
 
-.header-left {
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f1f5f9;
+}
+
+.header-text {
   flex: 1;
 }
 
 .page-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  color: white;
+  color: #1f2937;
   margin: 0 0 8px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.page-subtitle {
+.page-description {
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #6b7280;
   margin: 0;
 }
 
-.filters {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+.create-btn {
   border-radius: 12px;
-  padding: 20px;
+  height: 48px;
+  padding: 0 24px;
+  font-weight: 600;
+}
+
+.filters-section {
   margin-bottom: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.filters-container {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  gap: 24px;
+  align-items: end;
+}
+
+.filter-group {
+  flex: 1;
+  max-width: 200px;
+}
+
+.filter-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.filter-select,
+.filter-input {
+  width: 100%;
+}
+
+.projects-container {
+  min-height: 400px;
 }
 
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 24px;
 }
 
 .project-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: white;
   border-radius: 16px;
   padding: 24px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .project-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #e5e7eb;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.title-section {
+  flex: 1;
 }
 
 .project-title {
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
-  flex: 1;
+  color: #1f2937;
+  margin: 0 0 4px 0;
   line-height: 1.4;
 }
 
-.more-icon {
-  color: #909399;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s;
+.project-category {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
 }
 
-.more-icon:hover {
-  background: #f5f7fa;
-  color: #409eff;
+.more-btn {
+  color: #9ca3af;
+  padding: 8px;
+  margin: -8px;
+}
+
+.more-btn:hover {
+  color: #6366f1;
+  background-color: #f3f4f6;
 }
 
 .project-description {
-  color: #606266;
+  color: #4b5563;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 16px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
+  min-height: 42px;
 }
 
-.project-meta {
+.project-tags {
+  display: flex;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
-.meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.meta-row:last-child {
-  margin-bottom: 0;
-}
-
-.category {
-  font-size: 13px;
-  color: #909399;
-}
-
-.task-count {
-  font-size: 13px;
-  color: #909399;
+.status-tag,
+.priority-tag {
+  border-radius: 6px;
 }
 
 .progress-section {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.progress-info {
+.progress-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+}
+
+.progress-label {
   font-size: 13px;
-  color: #606266;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.progress-value {
+  font-size: 13px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.task-icon {
+  font-size: 14px;
 }
 
 .tech-stack {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
 }
 
+.tech-tag {
+  border-radius: 6px;
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.more-tech {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
 .empty-state {
-  grid-column: 1 / -1;
   text-align: center;
-  padding: 60px 20px;
-  color: rgba(255, 255, 255, 0.7);
+  padding: 80px 20px;
+  background: white;
+  border-radius: 16px;
+  border: 2px dashed #e5e7eb;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #374151;
+  margin: 16px 0 8px 0;
 }
 
 .empty-state p {
-  margin: 16px 0 24px 0;
+  color: #6b7280;
+  margin: 0 0 24px 0;
   font-size: 16px;
+}
+
+:deep(.el-dropdown-menu__item.danger-item) {
+  color: #ef4444;
+}
+
+:deep(.el-dropdown-menu__item.danger-item:hover) {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+:deep(.el-progress-bar__outer) {
+  background-color: #f1f5f9;
+  border-radius: 3px;
+}
+
+:deep(.el-progress-bar__inner) {
+  border-radius: 3px;
+}
+
+:deep(.el-button--primary) {
+  background-color: #6366f1;
+  border-color: #6366f1;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: #5855eb;
+  border-color: #5855eb;
+}
+
+:deep(.el-select .el-input__wrapper) {
+  border-radius: 8px;
+}
+
+:deep(.el-input__wrapper) {
+  border-radius: 8px;
 }
 </style>
