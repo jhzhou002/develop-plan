@@ -1,6 +1,19 @@
 const { getConnection } = require('../config/database');
 
 class ProjectController {
+  // 自动修复无效的tech_stack数据
+  async fixInvalidTechStack(projectId) {
+    try {
+      const connection = getConnection();
+      await connection.execute(
+        'UPDATE projects SET tech_stack = ? WHERE id = ?',
+        ['[]', projectId]
+      );
+      console.log(`Auto-fixed tech_stack for project ${projectId}`);
+    } catch (error) {
+      console.error(`Failed to auto-fix tech_stack for project ${projectId}:`, error);
+    }
+  }
   async getAllProjects(req, res) {
     try {
       const connection = getConnection();
@@ -46,17 +59,34 @@ class ProjectController {
         let techStack = [];
         if (row.tech_stack) {
           try {
-            techStack = JSON.parse(row.tech_stack);
+            // 如果是字符串且不是JSON格式，清理数据
+            if (typeof row.tech_stack === 'string') {
+              if (row.tech_stack.startsWith('[') && row.tech_stack.endsWith(']')) {
+                techStack = JSON.parse(row.tech_stack);
+              } else if (row.tech_stack.startsWith('{') && row.tech_stack.endsWith('}')) {
+                techStack = JSON.parse(row.tech_stack);
+              } else {
+                // 如果不是有效的JSON格式，设为空数组并记录警告
+                console.warn(`Invalid tech_stack format for project ${row.id}: "${row.tech_stack}"`);
+                techStack = [];
+                // 可选：自动修复数据库中的数据
+                this.fixInvalidTechStack(row.id);
+              }
+            } else if (Array.isArray(row.tech_stack)) {
+              techStack = row.tech_stack;
+            }
           } catch (error) {
-            console.warn('Failed to parse tech_stack for project', row.id, ':', error);
+            console.warn(`Failed to parse tech_stack for project ${row.id}:`, error.message);
             techStack = [];
+            // 自动修复数据库中的数据
+            this.fixInvalidTechStack(row.id);
           }
         }
         
         return {
           ...row,
-          tech_stack: techStack,
-          tags: row.tags ? row.tags.split(',') : []
+          tech_stack: Array.isArray(techStack) ? techStack : [],
+          tags: row.tags ? row.tags.split(',').filter(tag => tag.trim()) : []
         };
       });
       
@@ -99,10 +129,23 @@ class ProjectController {
       let techStack = [];
       if (rows[0].tech_stack) {
         try {
-          techStack = JSON.parse(rows[0].tech_stack);
+          if (typeof rows[0].tech_stack === 'string') {
+            if (rows[0].tech_stack.startsWith('[') && rows[0].tech_stack.endsWith(']')) {
+              techStack = JSON.parse(rows[0].tech_stack);
+            } else if (rows[0].tech_stack.startsWith('{') && rows[0].tech_stack.endsWith('}')) {
+              techStack = JSON.parse(rows[0].tech_stack);
+            } else {
+              console.warn(`Invalid tech_stack format for project ${rows[0].id}: "${rows[0].tech_stack}"`);
+              techStack = [];
+              this.fixInvalidTechStack(rows[0].id);
+            }
+          } else if (Array.isArray(rows[0].tech_stack)) {
+            techStack = rows[0].tech_stack;
+          }
         } catch (error) {
-          console.warn('Failed to parse tech_stack for project', rows[0].id, ':', error);
+          console.warn(`Failed to parse tech_stack for project ${rows[0].id}:`, error.message);
           techStack = [];
+          this.fixInvalidTechStack(rows[0].id);
         }
       }
       

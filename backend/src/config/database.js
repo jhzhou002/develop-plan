@@ -9,8 +9,9 @@ const DB_CONFIG = {
   charset: 'utf8mb4',
   timezone: '+08:00',
   connectionLimit: 10,
-  acquireTimeout: 60000,
-  timeout: 60000
+  queueLimit: 0,
+  reconnect: true,
+  reconnectDelay: 1000
 };
 
 let pool;
