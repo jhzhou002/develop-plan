@@ -105,7 +105,7 @@
             
             <div class="card-footer">
               <div class="task-info">
-                <el-icon class="task-icon"><Assignment /></el-icon>
+                <el-icon class="task-icon"><List /></el-icon>
                 <span>{{ project.completed_tasks || 0 }}/{{ project.task_count || 0 }} 任务</span>
               </div>
               
@@ -136,7 +136,7 @@ import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { Plus, DocumentAdd, MoreFilled, Edit, Delete, Assignment } from '@element-plus/icons-vue'
+import { Plus, DocumentAdd, MoreFilled, Edit, Delete, List } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const projectStore = useProjectStore()
