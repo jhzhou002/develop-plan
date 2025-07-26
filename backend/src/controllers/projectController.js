@@ -1,4 +1,4 @@
-const { getConnection } = require('../config/database');
+const { getConnection, executeWithRetry } = require('../config/database');
 
 class ProjectController {
   // 自动修复无效的tech_stack数据
@@ -53,7 +53,7 @@ class ProjectController {
       
       query += ' GROUP BY p.id ORDER BY p.updated_at DESC';
       
-      const [rows] = await connection.execute(query, params);
+      const [rows] = await executeWithRetry(query, params);
       
       const projects = rows.map(row => {
         let techStack = [];

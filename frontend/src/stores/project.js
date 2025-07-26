@@ -86,6 +86,15 @@ export const useProjectStore = defineStore('project', () => {
     fetchProjects()
   }
 
+  const clearFilters = () => {
+    filters.value = {
+      status: '',
+      category: '',
+      priority: ''
+    }
+    fetchProjects()
+  }
+
   return {
     projects,
     currentProject,
@@ -96,6 +105,7 @@ export const useProjectStore = defineStore('project', () => {
     createProject,
     updateProject,
     deleteProject,
-    setFilters
+    setFilters,
+    clearFilters
   }
 })

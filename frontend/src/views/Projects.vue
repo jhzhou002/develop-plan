@@ -41,6 +41,13 @@
           <label class="filter-label">分类</label>
           <el-input v-model="filters.category" placeholder="搜索分类" clearable @input="handleFilterChange" class="filter-input" />
         </div>
+        
+        <div class="filter-actions">
+          <el-button @click="clearFilters" size="small">
+            <el-icon><RefreshLeft /></el-icon>
+            清除筛选
+          </el-button>
+        </div>
       </div>
     </div>
 
@@ -136,7 +143,7 @@ import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { Plus, DocumentAdd, MoreFilled, Edit, Delete, List } from '@element-plus/icons-vue'
+import { Plus, DocumentAdd, MoreFilled, Edit, Delete, List, RefreshLeft } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const projectStore = useProjectStore()
@@ -193,7 +200,17 @@ const getPriorityText = (priority) => {
 }
 
 const handleFilterChange = () => {
+  console.log('筛选条件变更:', filters)
   projectStore.setFilters(filters)
+}
+
+const clearFilters = () => {
+  Object.assign(filters, {
+    status: '',
+    priority: '',
+    category: ''
+  })
+  projectStore.clearFilters()
 }
 
 const goToProject = (id) => {
@@ -220,8 +237,14 @@ const handleCommand = async (command) => {
   }
 }
 
-onMounted(() => {
-  projectStore.fetchProjects()
+onMounted(async () => {
+  console.log('Projects页面已挂载，开始获取项目数据...')
+  try {
+    await projectStore.fetchProjects()
+    console.log('项目数据获取成功，共', projects.value.length, '个项目')
+  } catch (error) {
+    console.error('初始加载项目失败:', error)
+  }
 })
 </script>
 
@@ -287,6 +310,12 @@ onMounted(() => {
 .filter-group {
   flex: 1;
   max-width: 200px;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: end;
+  padding-bottom: 2px;
 }
 
 .filter-label {
