@@ -212,6 +212,35 @@ npm start
 - **jhzhou002** - [GitHub](https://github.com/jhzhou002)
 - **Email**: 318352733@qq.com
 
+## 🔧 故障排除
+
+### 常见问题
+
+#### 1. JSON解析错误
+如果遇到 "Unexpected token V in JSON" 错误：
+
+```bash
+# 执行数据库修复脚本
+mysql -u connect -p develop-plan < database/fix-tech-stack.sql
+```
+
+#### 2. 数据库连接失败
+检查 `backend/src/config/database.js` 中的数据库配置是否正确。
+
+#### 3. 前端无法访问后端API
+确保：
+- 后端服务运行在 3001 端口
+- 前端代理配置正确
+- CORS 配置允许前端域名
+
+#### 4. 依赖安装失败
+```bash
+# 清理缓存后重新安装
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
 ## 🙏 致谢
 
 感谢所有为这个项目做出贡献的开发者和设计师！
