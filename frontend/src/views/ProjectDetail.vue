@@ -89,14 +89,14 @@
                     <el-icon><Calendar /></el-icon>
                     开始日期
                   </div>
-                  <div class="info-value">{{ project.start_date || '未设置' }}</div>
+                  <div class="info-value">{{ formatDateOnly(project.start_date) }}</div>
                 </div>
                 <div class="info-item">
                   <div class="info-label">
                     <el-icon><Timer /></el-icon>
                     目标日期
                   </div>
-                  <div class="info-value">{{ project.target_date || '未设置' }}</div>
+                  <div class="info-value">{{ formatDateOnly(project.target_date) }}</div>
                 </div>
                 <div class="info-item">
                   <div class="info-label">
@@ -281,6 +281,11 @@ const getPriorityText = (priority) => {
 
 const formatDate = (dateString) => {
   return dayjs(dateString).format('YYYY-MM-DD HH:mm')
+}
+
+const formatDateOnly = (dateString) => {
+  if (!dateString) return '未设置'
+  return dayjs(dateString).format('YYYY年MM月DD日')
 }
 
 const initEditForm = () => {
